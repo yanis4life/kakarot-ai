@@ -6,27 +6,6 @@ workers_dev = false
 
 route = "kakarot-ai.cc.cd/*"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "kakarot-db"
-database_id = "placeholder"
-
-[[kv_namespaces]]
-binding = "KV"
-id = "placeholder"
-
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "kakarot-storage"
-
-[[queues.producers]]
-binding = "SUMMARY_QUEUE"
-queue = "summary-generation"
-
-[[queues.producers]]
-binding = "EMAIL_QUEUE"
-queue = "email-notifications"
-
 [triggers]
 crons = ["0 0 * * *", "0 0 1 * *"]
 
