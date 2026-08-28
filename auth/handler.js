@@ -4,6 +4,18 @@ import { validateEmail, validatePassword, sanitizeString, getClientIp } from '..
 import { createUser, getUserByEmail, getUserById, updateUser, incrementIpCount, checkIpRestriction } from '../database/operations.js';
 import { checkCoinsAndReset } from '../coins/manager.js';
 
+function setAuthCookies(response, accessToken, refreshToken, csrfToken) {
+  response.headers.append('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900`);
+  response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);
+  response.headers.append('Set-Cookie', `csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+}
+
+function clearAuthCookies(response) {
+  response.headers.append('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');
+  response.headers.append('Set-Cookie', 'refresh_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');
+  response.headers.append('Set-Cookie', 'csrf_token=; Secure; SameSite=Lax; Path=/; Max-Age=0');
+}
+
 export async function handleRegister(request, env) {
   try {
     const body = await request.json();
@@ -45,8 +57,7 @@ export async function handleRegister(request, env) {
     const refreshToken = generateJwt({ userId, type: 'refresh' }, jwtSecret, 604800);
 
     const response = successResponse({ user: { id: userId, email, name: sanitizedName, role: 'user', coins: 30 } }, 201);
-
-    response.headers.set('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900; refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800; csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken);
 
     return response;
   } catch (e) {
@@ -94,8 +105,7 @@ export async function handleLogin(request, env) {
         coins: refreshedUser.coins
       }
     });
-
-    response.headers.set('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900; refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800; csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken);
 
     return response;
   } catch (e) {
@@ -160,8 +170,7 @@ export async function handleGoogleAuth(request, env) {
         coins: refreshedUser.coins
       }
     });
-
-    response.headers.set('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900; refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800; csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken);
 
     return response;
   } catch (e) {
@@ -171,7 +180,7 @@ export async function handleGoogleAuth(request, env) {
 
 export async function handleLogout(request, env) {
   const response = successResponse({ message: 'Logged out successfully' });
-  response.headers.set('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; refresh_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; csrf_token=; Secure; SameSite=Lax; Path=/; Max-Age=0');
+  clearAuthCookies(response);
   return response;
 }
 
@@ -202,7 +211,7 @@ export async function handleRefresh(request, env) {
     const newRefreshToken = generateJwt({ userId: user.id, type: 'refresh' }, env.JWT_SECRET, 604800);
 
     const response = successResponse({ message: 'Token refreshed' });
-    response.headers.set('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900; refresh_token=${newRefreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800; csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+    setAuthCookies(response, accessToken, newRefreshToken, csrfToken);
 
     return response;
   } catch (e) {
