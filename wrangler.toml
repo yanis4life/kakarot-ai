@@ -32,11 +32,9 @@ queue = "email-notifications"
 crons = ["0 0 * * *", "0 0 1 * *"]
 
 [env.production]
-vars = { 
-  ENVIRONMENT = "production",
-  APP_URL = "https://kakarot-ai.cc.cd",
-  PERPLEXITY_API_URL = "https://www.perplexity.ai/rest/sse/perplexity_ask"
-}
+ENVIRONMENT = "production"
+APP_URL = "https://kakarot-ai.cc.cd"
+PERPLEXITY_API_URL = "https://www.perplexity.ai/rest/sse/perplexity_ask"
 
 [env.development]
-vars = { ENVIRONMENT = "development" }
+ENVIRONMENT = "development"
