@@ -136,7 +136,7 @@ export function getModelByKey(key) {
 }
 
 export function getEnabledModels() {
-  return Object.entries(modelMap).map(([key, model]) => ({
+  return Object.entries(modelMap).filter(([key]) => !key.endsWith('_thinking') && !key.endsWith('thinking')).map(([key, model]) => ({
     id: key,
     object: 'model',
     created: 1700000000,
