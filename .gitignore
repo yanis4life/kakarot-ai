@@ -8,3 +8,4 @@ dist/
 cf.txt
 prompt.txt
 kakarot_history
+client_secret_*.json

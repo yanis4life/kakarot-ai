@@ -7,11 +7,36 @@ routes = [
   { pattern = "kakarot-ai.cc.cd/*", zone_id = "2062c1b3a6a38a40d4bf4ac15a3f435a" }
 ]
 
+[[d1_databases]]
+binding = "DB"
+database_name = "kakarot-db"
+database_id = ""
+
+[[kv_namespaces]]
+binding = "KV"
+id = "f8c6e66fd2134f5dbb15384a2578a0d7"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "kakarot-storage"
+
+[[queues.producers]]
+binding = "SUMMARY_QUEUE"
+queue = "summary-generation"
+
+[[queues.producers]]
+binding = "EMAIL_QUEUE"
+queue = "email-notifications"
+
 [triggers]
 crons = ["0 0 * * *", "0 0 1 * *"]
 
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { 
+  ENVIRONMENT = "production",
+  APP_URL = "https://kakarot-ai.cc.cd",
+  PERPLEXITY_API_URL = "https://www.perplexity.ai/rest/sse/perplexity_ask"
+}
 
 [env.development]
 vars = { ENVIRONMENT = "development" }
