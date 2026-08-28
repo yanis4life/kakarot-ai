@@ -10,6 +10,10 @@ import { getClientIp } from '../utils/validation.js';
 import { handleAdminRoutes } from '../admin/router.js';
 import { serveStaticFile } from './static.js';
 
+function isApiRequest(request) {
+  return request.headers.get('X-Requested-With') === 'XMLHttpRequest' || request.method !== 'GET';
+}
+
 export async function handleRequest(request, env, ctx) {
   const url = new URL(request.url);
   const path = url.pathname;
@@ -18,7 +22,15 @@ export async function handleRequest(request, env, ctx) {
     return corsResponse();
   }
 
-  if (path.startsWith('/static/') || path === '/' || path === '/login' || path === '/register' || path === '/chat' || path === '/settings' || path === '/workspaces' || path === '/favicon.ico') {
+  if (path.startsWith('/static/')) {
+    return serveStaticFile(request, env, path);
+  }
+
+  if (path === '/' || path === '/favicon.ico') {
+    return serveStaticFile(request, env, path);
+  }
+
+  if ((path === '/login' || path === '/register' || path === '/chat' || path === '/settings' || path === '/workspaces') && !isApiRequest(request)) {
     return serveStaticFile(request, env, path);
   }
 
