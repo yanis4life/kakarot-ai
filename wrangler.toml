@@ -2,9 +2,6 @@ name = "kakarot-ai"
 compatibility_date = "2024-01-01"
 main = "src/index.js"
 account_id = "ae693ae9f4faf8d8202a61970309f150"
-workers_dev = false
-
-route = "kakarot-ai.cc.cd/*"
 
 [triggers]
 crons = ["0 0 * * *", "0 0 1 * *"]
