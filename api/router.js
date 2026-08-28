@@ -18,7 +18,7 @@ export async function handleRequest(request, env, ctx) {
     return corsResponse();
   }
 
-  if (path.startsWith('/static/') || path === '/' || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/chat') || path.startsWith('/workspaces') || path.startsWith('/settings') || path === '/favicon.ico') {
+  if (path.startsWith('/static/') || path === '/' || path === '/login' || path === '/register' || path === '/chat' || path === '/settings' || path === '/workspaces' || path === '/favicon.ico') {
     return serveStaticFile(request, env, path);
   }
 
@@ -70,7 +70,7 @@ export async function handleRequest(request, env, ctx) {
   }
 
   if (path.startsWith('/settings/')) return handleSettings(request, env, authResult.user);
-  if (path.startsWith('/workspaces')) return handleWorkspaces(request, env, authResult.user);
+  if (path === '/workspaces' || path.startsWith('/workspaces/')) return handleWorkspaces(request, env, authResult.user);
   if (path.startsWith('/conversations')) return handleConversations(request, env, authResult.user);
 
   return errorResponse('NOT_FOUND', 'Endpoint not found', {}, 404);
