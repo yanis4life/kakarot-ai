@@ -14,8 +14,8 @@ export async function handleConversations(request, env, user) {
   if (path === '/conversations' && request.method === 'GET') {
     const workspaceId = url.searchParams.get('workspace_id');
     if (!workspaceId) return errorResponse('VALIDATION_ERROR', 'workspace_id query parameter is required');
-    const conversations = await listConversations(env.DB, user.id, workspaceId);
-    return successResponse({ conversations });
+    const result = await listConversations(env.DB, user.id, workspaceId);
+    return successResponse({ conversations: result.results || [] });
   }
 
   if (path === '/conversations' && request.method === 'POST') {
@@ -33,13 +33,13 @@ export async function handleConversations(request, env, user) {
     const id = path.split('/').pop();
     if (path.endsWith('/messages')) {
       const convId = path.split('/').slice(-2, -1)[0];
-      const messages = await getMessages(env.DB, convId);
-      return successResponse({ messages });
+      const result = await getMessages(env.DB, convId);
+      return successResponse({ messages: result.results || [] });
     }
     const conversation = await getConversation(env.DB, id, user.id);
     if (!conversation) return errorResponse('NOT_FOUND', 'Conversation not found', {}, 404);
-    const messages = await getMessages(env.DB, id);
-    return successResponse({ conversation, messages });
+    const result = await getMessages(env.DB, id);
+    return successResponse({ conversation, messages: result.results || [] });
   }
 
   if (path.startsWith('/conversations/') && request.method === 'PUT') {
@@ -70,8 +70,8 @@ export async function handleConversations(request, env, user) {
 
     await createMessage(env.DB, convId, 'user', sanitizeString(userMessage));
 
-    const recentMessages = await getRecentMessages(env.DB, convId, 10);
-    const contextMessages = recentMessages.reverse().map(m => ({
+    const recentResult = await getRecentMessages(env.DB, convId, 10);
+    const contextMessages = (recentResult.results || []).reverse().map(m => ({
       role: m.role,
       content: m.content
     }));

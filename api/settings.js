@@ -59,7 +59,7 @@ export async function handleSettings(request, env, user) {
 
   if (path === '/settings/api-keys' && request.method === 'GET') {
     const keys = await listApiKeys(env.DB, user.id);
-    return successResponse({ api_keys: keys });
+    return successResponse({ api_keys: keys.results || [] });
   }
 
   if (path === '/settings/api-keys' && request.method === 'POST') {
@@ -95,12 +95,15 @@ export async function handleSettings(request, env, user) {
 
   if (path === '/settings/export' && request.method === 'GET') {
     const { getMessages, listConversations, listWorkspaces } = await import('../database/operations.js');
-    const workspaces = await listWorkspaces(env.DB, user.id);
+    const wsResult = await listWorkspaces(env.DB, user.id);
+        const workspaces = wsResult.results || [];
     const conversations = [];
     for (const ws of workspaces) {
-      const convs = await listConversations(env.DB, user.id, ws.id);
+      const convResult = await listConversations(env.DB, user.id, ws.id);
+            const convs = convResult.results || [];
       for (const conv of convs) {
-        const messages = await getMessages(env.DB, conv.id);
+        const msgResult = await getMessages(env.DB, conv.id);
+            const messages = msgResult.results || [];
         conversations.push({
           id: conv.id,
           workspace_id: conv.workspace_id,
@@ -140,7 +143,8 @@ export async function handleSettings(request, env, user) {
     for (const conv of conversations) {
       if (!conv.title || !conv.messages) continue;
       let workspaceId = conv.workspace_id;
-      const workspaces = await listWorkspaces(env.DB, user.id);
+      const wsResult = await listWorkspaces(env.DB, user.id);
+        const workspaces = wsResult.results || [];
       const ws = workspaces.find(w => w.name === (conv.workspace_name || 'Imported'));
       if (ws) {
         workspaceId = ws.id;

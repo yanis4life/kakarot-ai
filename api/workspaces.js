@@ -11,8 +11,8 @@ export async function handleWorkspaces(request, env, user) {
   }
 
   if (path === '/workspaces' && request.method === 'GET') {
-    const workspaces = await listWorkspaces(env.DB, user.id);
-    return successResponse({ workspaces });
+    const result = await listWorkspaces(env.DB, user.id);
+    return successResponse({ workspaces: result.results || [] });
   }
 
   if (path === '/workspaces' && request.method === 'POST') {
