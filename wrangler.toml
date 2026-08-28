@@ -1,0 +1,34 @@
+name = "kakarot-ai"
+compatibility_date = "2024-01-01"
+main = "src/index.js"
+account_id = "ae693ae9f4faf8d8202a61970309f150"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kakarot-db"
+database_id = ""
+
+[[kv_namespaces]]
+binding = "KV"
+id = ""
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "kakarot-storage"
+
+[[queues]]
+binding = "SUMMARY_QUEUE"
+queue_name = "summary-generation"
+
+[[queues]]
+binding = "EMAIL_QUEUE"
+queue_name = "email-notifications"
+
+[triggers]
+crons = ["0 0 * * *", "0 0 1 * *"]
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }

@@ -1,0 +1,10 @@
+node_modules/
+.wrangler/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+cf.txt
+prompt.txt
+kakarot_history
