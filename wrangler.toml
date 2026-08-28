@@ -20,14 +20,6 @@ id = "f8c6e66fd2134f5dbb15384a2578a0d7"
 binding = "R2"
 bucket_name = "kakarot-storage"
 
-[[queues.producers]]
-binding = "SUMMARY_QUEUE"
-queue = "summary-generation"
-
-[[queues.producers]]
-binding = "EMAIL_QUEUE"
-queue = "email-notifications"
-
 [triggers]
 crons = ["0 0 * * *", "0 0 1 * *"]
 

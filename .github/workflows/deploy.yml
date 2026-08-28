@@ -38,7 +38,10 @@ jobs:
       - name: Get D1 database ID
         id: d1
         run: |
-          DB_ID=$(npx wrangler d1 list --json 2>/dev/null | python3 -c "import sys,json; dbs=json.load(sys.stdin); print([d['uuid'] for d in dbs if d['name']=='kakarot-db'][0])" 2>/dev/null || echo "")
+          DB_ID=$(npx wrangler d1 info kakarot-db --json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('uuid','') or d.get('result',{}).get('uuid',''))" 2>/dev/null || echo "")
+          if [ -z "$DB_ID" ]; then
+            DB_ID=$(npx wrangler d1 list 2>/dev/null | grep "kakarot-db" | awk '{print $1}')
+          fi
           echo "DB_ID=$DB_ID" >> $GITHUB_OUTPUT
           echo "Found D1 database ID: $DB_ID"
 
