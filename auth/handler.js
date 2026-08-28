@@ -4,16 +4,22 @@ import { validateEmail, validatePassword, sanitizeString, getClientIp } from '..
 import { createUser, getUserByEmail, getUserById, updateUser, incrementIpCount, checkIpRestriction } from '../database/operations.js';
 import { checkCoinsAndReset } from '../coins/manager.js';
 
-function setAuthCookies(response, accessToken, refreshToken, csrfToken) {
-  response.headers.append('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900`);
-  response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);
-  response.headers.append('Set-Cookie', `csrf_token=${csrfToken}; Secure; SameSite=Lax; Path=/`);
+function getCookieSecure(env) {
+  return env.ENVIRONMENT === 'production' ? 'Secure; ' : '';
 }
 
-function clearAuthCookies(response) {
-  response.headers.append('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');
-  response.headers.append('Set-Cookie', 'refresh_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0');
-  response.headers.append('Set-Cookie', 'csrf_token=; Secure; SameSite=Lax; Path=/; Max-Age=0');
+function setAuthCookies(response, accessToken, refreshToken, csrfToken, env) {
+  const secure = getCookieSecure(env);
+  response.headers.append('Set-Cookie', `token=${accessToken}; HttpOnly; ${secure}SameSite=Lax; Path=/; Max-Age=900`);
+  response.headers.append('Set-Cookie', `refresh_token=${refreshToken}; HttpOnly; ${secure}SameSite=Lax; Path=/; Max-Age=604800`);
+  response.headers.append('Set-Cookie', `csrf_token=${csrfToken}; ${secure}SameSite=Lax; Path=/`);
+}
+
+function clearAuthCookies(response, env) {
+  const secure = getCookieSecure(env);
+  response.headers.append('Set-Cookie', `token=; HttpOnly; ${secure}SameSite=Lax; Path=/; Max-Age=0`);
+  response.headers.append('Set-Cookie', `refresh_token=; HttpOnly; ${secure}SameSite=Lax; Path=/; Max-Age=0`);
+  response.headers.append('Set-Cookie', `csrf_token=; ${secure}SameSite=Lax; Path=/; Max-Age=0`);
 }
 
 export async function handleRegister(request, env) {
@@ -57,7 +63,7 @@ export async function handleRegister(request, env) {
     const refreshToken = generateJwt({ userId, type: 'refresh' }, jwtSecret, 604800);
 
     const response = successResponse({ user: { id: userId, email, name: sanitizedName, role: 'user', coins: 30 } }, 201);
-    setAuthCookies(response, accessToken, refreshToken, csrfToken);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken, env);
 
     return response;
   } catch (e) {
@@ -105,7 +111,7 @@ export async function handleLogin(request, env) {
         coins: refreshedUser.coins
       }
     });
-    setAuthCookies(response, accessToken, refreshToken, csrfToken);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken, env);
 
     return response;
   } catch (e) {
@@ -170,7 +176,7 @@ export async function handleGoogleAuth(request, env) {
         coins: refreshedUser.coins
       }
     });
-    setAuthCookies(response, accessToken, refreshToken, csrfToken);
+    setAuthCookies(response, accessToken, refreshToken, csrfToken, env);
 
     return response;
   } catch (e) {
@@ -180,7 +186,7 @@ export async function handleGoogleAuth(request, env) {
 
 export async function handleLogout(request, env) {
   const response = successResponse({ message: 'Logged out successfully' });
-  clearAuthCookies(response);
+  clearAuthCookies(response, env);
   return response;
 }
 
@@ -211,7 +217,7 @@ export async function handleRefresh(request, env) {
     const newRefreshToken = generateJwt({ userId: user.id, type: 'refresh' }, env.JWT_SECRET, 604800);
 
     const response = successResponse({ message: 'Token refreshed' });
-    setAuthCookies(response, accessToken, newRefreshToken, csrfToken);
+    setAuthCookies(response, accessToken, newRefreshToken, csrfToken, env);
 
     return response;
   } catch (e) {
